@@ -8,11 +8,9 @@ class Word:
     def isDoubleLined(self):
       if self.word[-1:] == '-':
           return True
-    def hasDoubleDashes(self):
-      if "--" in self.word:
+    def hasDashes(self):
+      if "-" in self.word:
         return True
-      else:
-        return False
     def isValidLength(self):
       if len(self.word) >= 5 and len(self.word) <= 9:
         return True
@@ -56,13 +54,13 @@ class Filter:
         currentWord.combine(words[idx + 1])
         flag = 1
         continue
-      if currentWord.hasDoubleDashes():
-        splitWords = currentWord.word.split('--')
-        for word in splitWords:
-          word = Word(word)
-          if word.isValidLength() == True:
-            updatedWords.checkAndUpdate(word.word)
-      if currentWord.isValidLength():
+      if currentWord.hasDashes() == True:
+        splitWords = re.split('-',currentWord.word)
+        for splitee in splitWords:
+          splitee = Word(splitee)
+          if splitee.isValidLength() == True:
+            updatedWords.checkAndUpdate(splitee.word)
+      elif currentWord.isValidLength():
         updatedWords.checkAndUpdate(currentWord.word)
     return updatedWords
 
@@ -83,8 +81,18 @@ class FileHandler:
     words               = Filter.NonWords(fileData)
     finalDictionary     = Filter.doubleLinedWords(words)
     self.dictionary     = finalDictionary.getDictionaryStats()
-
+# TO DO:
+  # get frequency from all 8 books 
+  # 
 if __name__ == "__main__":
-    F = FileHandler(sys.argv[1])
-    F.readFile()
-    print(F.dictionary)
+    Austen1 = FileHandler("/u1/junk/cs617/Books/austen.em.txt")
+    Austen2 = FileHandler("/u1/junk/cs617/Books/austen.pp.txt")
+    Austen3 = FileHandler("/u1/junk/cs617/Books/austen.pe.txt")
+    Austen4 = FileHandler("/u1/junk/cs617/Books/austen.ss.txt")
+    Dickens1 = FileHandler("/u1/junk/cs617/Books/dickens.ge.txt")
+    Dickens2 = FileHandler("/u1/junk/cs617/Books/austen.ht.txt")
+    Dickens3 = FileHandler("/u1/junk/cs617/Books/austen.tc.txt")
+    Dickens4 = FileHandler("/u1/junk/cs617/Books/austen.gt.txt")
+    Austen1.readFile()
+    
+    #print(Austen1.dictionary)
