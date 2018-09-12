@@ -1,10 +1,10 @@
-#!
+
 import sys
 import re
 #   /u1/junk/cs617/Books
 class Word:
     def __init__(self,word):
-        self.word = word
+        self.word = word.lower()
     def isDoubleLined(self):
       if self.word[-1:] == '-':
           return True
@@ -24,10 +24,10 @@ class Dictionary:
     def __init__(self):
         self.dict = dict()
     def checkAndUpdate(self,word):
-      if self.dict.get(word) == None:
-        self.dict[word] = 1
-      else:
+      if word in self.dict:
         self.dict[word] = self.dict[word] + 1
+      else:
+        self.dict[word] = 1
     def getDictionaryStats(self):
       return self.dict
 
@@ -54,11 +54,11 @@ class Filter:
         currentWord.combine(words[idx + 1])
         flag = 1
         continue
-      if currentWord.hasDashes() == True:
+      if currentWord.hasDashes():
         splitWords = re.split('-',currentWord.word)
         for splitee in splitWords:
           splitee = Word(splitee)
-          if splitee.isValidLength() == True:
+          if splitee.isValidLength():
             updatedWords.checkAndUpdate(splitee.word)
       elif currentWord.isValidLength():
         updatedWords.checkAndUpdate(currentWord.word)
@@ -67,9 +67,10 @@ class Filter:
 
 class FileHandler:
   def __init__(self,fileName):
-    self.fileName  = fileName
-    self.words     = None
+    self.fileName   = fileName
+    self.words      = None
     self.dictionary = None
+    self.readFile()
   def readFile(self):
     try:
       with open(self.fileName, "r") as fileData:
@@ -81,18 +82,52 @@ class FileHandler:
     words               = Filter.NonWords(fileData)
     finalDictionary     = Filter.doubleLinedWords(words)
     self.dictionary     = finalDictionary.getDictionaryStats()
-# TO DO:
-  # get frequency from all 8 books 
-  # 
+
+class WordChart:
+  def __init__(self,dictionaries):
+    self.bookDictionaries = dictionaries
+    self.wordChart        = dict()
+    self.wordFrequencyOfEachBook = []
+  def collectAndPrint(self):
+    allWords = set([])
+    for bookDictionary in self.bookDictionaries:
+      allWords = allWords | set(bookDictionary.keys())
+    for word in allWords:
+      self.wordChart[word] = []
+      for i in range(0,len(self.bookDictionaries)):
+        try:
+          self.wordChart[word].append(self.bookDictionaries[i][word])
+        except KeyError:
+          self.wordChart[word].append(0)
+    print(self.wordChart)
+
+
+class BookCollectionHandler:
+  def __init__(self,bookPaths):
+    self.bookPaths        = bookPaths
+    self.bookDictionaries = []
+    self.getDictionaryStats()
+    self.wordCounterObjects = []
+    #bookDictionaries is an array of FileHandlerObjects
+  def getDictionaryStats(self):
+    for book in self.bookPaths:
+      bookFile = FileHandler(book)
+      self.bookDictionaries.append(bookFile.dictionary)
+
+  def CreateWordDictionary(self):
+    chart = WordChart(self.bookDictionaries)
+    chart.collectAndPrint()
+
 if __name__ == "__main__":
-    Austen1 = FileHandler("/u1/junk/cs617/Books/austen.em.txt")
-    Austen2 = FileHandler("/u1/junk/cs617/Books/austen.pp.txt")
-    Austen3 = FileHandler("/u1/junk/cs617/Books/austen.pe.txt")
-    Austen4 = FileHandler("/u1/junk/cs617/Books/austen.ss.txt")
-    Dickens1 = FileHandler("/u1/junk/cs617/Books/dickens.ge.txt")
-    Dickens2 = FileHandler("/u1/junk/cs617/Books/austen.ht.txt")
-    Dickens3 = FileHandler("/u1/junk/cs617/Books/austen.tc.txt")
-    Dickens4 = FileHandler("/u1/junk/cs617/Books/austen.gt.txt")
-    Austen1.readFile()
-    
+    bookPaths = ["/u1/junk/cs617/Books/austen.em.txt",
+	     "/u1/junk/cs617/Books/austen.pp.txt",
+	     "/u1/junk/cs617/Books/austen.pe.txt",
+	     "/u1/junk/cs617/Books/austen.ss.txt",
+	     "/u1/junk/cs617/Books/dickens.ge.txt",
+	     "/u1/junk/cs617/Books/dickens.ht.txt",
+	     "/u1/junk/cs617/Books/dickens.tc.txt",
+	     "/u1/junk/cs617/Books/dickens.ot.txt"]
+    Books = BookCollectionHandler(bookPaths)
+    Books.CreateWordDictionary()
+
     #print(Austen1.dictionary)
