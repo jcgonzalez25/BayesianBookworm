@@ -64,7 +64,6 @@ class Filter:
         updatedWords.checkAndUpdate(currentWord.word)
     return updatedWords
 
-
 class FileHandler:
   def __init__(self,fileName):
     self.fileName   = fileName
@@ -88,20 +87,33 @@ class WordChart:
     self.bookDictionaries = dictionaries
     self.wordChart        = dict()
     self.wordFrequencyOfEachBook = []
-  def collectAndPrint(self):
+    self.totalWordCountsForAuthors = dict()
+    self.austinTotalImportantWords  = 0
+    self.dickensTotalImportantWords = 0
+  def collect(self):
     allWords = set([])
     for bookDictionary in self.bookDictionaries:
       allWords = allWords | set(bookDictionary.keys())
     for word in allWords:
       self.wordChart[word] = []
       for i in range(0,len(self.bookDictionaries)):
+        currentDictionary = self.bookDictionaries[i]
         try:
-          self.wordChart[word].append(self.bookDictionaries[i][word])
+          self.wordChart[word].append(currentDictionary[word])
         except KeyError:
           self.wordChart[word].append(0)
-    print(self.wordChart)
-
-
+      self.checkIfImportant(word)
+  def checkIfImportant(self,word):
+    wordData = self.wordChart[word]
+    if sum(wordData) > 50:
+      austinCurrentWC  = sum(wordData[:4])
+      dickensCurrentWC = sum(wordData[4:])
+      self.austinTotalImportantWords  += austinCurrentWC
+      self.dickensTotalImportantWords += dickensCurrentWC
+      self.totalWordCountsForAuthors[word] = [austinCurrentWC,dickensCurrentWC]
+    else:
+      self.wordChart.pop(word)
+    
 class BookCollectionHandler:
   def __init__(self,bookPaths):
     self.bookPaths        = bookPaths
@@ -116,8 +128,9 @@ class BookCollectionHandler:
 
   def CreateWordDictionary(self):
     chart = WordChart(self.bookDictionaries)
-    chart.collectAndPrint()
-
+    chart.collect()
+    print(chart.austinTotalImportantWords)
+    #chart.computeProbabilities()
 if __name__ == "__main__":
     bookPaths = ["/u1/junk/cs617/Books/austen.em.txt",
 	     "/u1/junk/cs617/Books/austen.pp.txt",
@@ -129,5 +142,3 @@ if __name__ == "__main__":
 	     "/u1/junk/cs617/Books/dickens.ot.txt"]
     Books = BookCollectionHandler(bookPaths)
     Books.CreateWordDictionary()
-
-    #print(Austen1.dictionary)
