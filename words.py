@@ -84,12 +84,12 @@ class FileHandler:
 
 class WordChart:
   def __init__(self,dictionaries):
-    self.bookDictionaries = dictionaries
-    self.wordChart        = dict()
-    self.wordFrequencyOfEachBook = []
+    self.bookDictionaries          = dictionaries
+    self.wordChart                 = dict()
     self.totalWordCountsForAuthors = dict()
-    self.austinTotalImportantWords  = 0
-    self.dickensTotalImportantWords = 0
+    self.wordFrequencyOfEachBook   = []
+    self.austinTotalImportantWords = 0
+    self.dickensTotalImportantWords= 0
   def collect(self):
     allWords = set([])
     for bookDictionary in self.bookDictionaries:
@@ -106,20 +106,22 @@ class WordChart:
   def checkIfImportant(self,word):
     wordData = self.wordChart[word]
     if sum(wordData) > 50:
+      print(word)
       austinCurrentWC  = sum(wordData[:4])
       dickensCurrentWC = sum(wordData[4:])
       self.austinTotalImportantWords  += austinCurrentWC
       self.dickensTotalImportantWords += dickensCurrentWC
       self.totalWordCountsForAuthors[word] = [austinCurrentWC,dickensCurrentWC]
+      print(self.totalWordCountsForAuthors[word])
     else:
       self.wordChart.pop(word)
     
 class BookCollectionHandler:
   def __init__(self,bookPaths):
-    self.bookPaths        = bookPaths
-    self.bookDictionaries = []
-    self.getDictionaryStats()
+    self.bookPaths          = bookPaths
+    self.bookDictionaries   = []
     self.wordCounterObjects = []
+    self.getDictionaryStats()
     #bookDictionaries is an array of FileHandlerObjects
   def getDictionaryStats(self):
     for book in self.bookPaths:
@@ -129,16 +131,15 @@ class BookCollectionHandler:
   def CreateWordDictionary(self):
     chart = WordChart(self.bookDictionaries)
     chart.collect()
-    print(chart.austinTotalImportantWords)
     #chart.computeProbabilities()
 if __name__ == "__main__":
-    bookPaths = ["/u1/junk/cs617/Books/austen.em.txt",
-	     "/u1/junk/cs617/Books/austen.pp.txt",
-	     "/u1/junk/cs617/Books/austen.pe.txt",
-	     "/u1/junk/cs617/Books/austen.ss.txt",
-	     "/u1/junk/cs617/Books/dickens.ge.txt",
-	     "/u1/junk/cs617/Books/dickens.ht.txt",
-	     "/u1/junk/cs617/Books/dickens.tc.txt",
-	     "/u1/junk/cs617/Books/dickens.ot.txt"]
+    bookPaths = ["Books/austen.em.txt",
+	     "Books/austen.pp.txt",
+	     "Books/austen.pe.txt",
+	     "Books/austen.ss.txt",
+	     "Books/dickens.ge.txt",
+	     "Books/dickens.ht.txt",
+	     "Books/dickens.tc.txt",
+	     "Books/dickens.ot.txt"]
     Books = BookCollectionHandler(bookPaths)
     Books.CreateWordDictionary()
